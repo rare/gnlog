@@ -62,7 +62,7 @@ func main() {
 		fmt.Printf("Init Server error: (%s).\n", err)
 		return
 	}
-	
+
 	initHandler(svr)
 
 	wg.Add(1)
