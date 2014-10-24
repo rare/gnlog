@@ -1,7 +1,7 @@
 package gnlog
 
 import (
-	gnet "../gnet"
+	"github.com/rare/gnet"
 )
 
 type Config struct {

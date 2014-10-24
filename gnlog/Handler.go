@@ -1,8 +1,8 @@
 package gnlog
 
 import (
-	gnet "../gnet"
-	gnproto "../gnet/gnproto"
+	"github.com/rare/gnet"
+	"github.com/rare/gnet/gnproto"
 )
 
 func HandleStart(client *gnet.Client, header *gnproto.Header, body []byte) error {
