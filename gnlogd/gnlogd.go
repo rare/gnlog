@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	"github.com/rare/gnet"
-	"github.com/rare/gnlog/gnlog"
+	"github.com/rare/gnlog/libgnlog"
 	"github.com/rare/gnlog/conf"
 )
 
