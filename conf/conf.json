@@ -6,6 +6,7 @@
 		"max_clients"			: 10000,
 		"heartbeat_timeout"		: 5,
 		"read_timeout"			: 10,
-		"write_timeout"			: 10
+		"write_timeout"			: 10,
+		"out_chan_buf_size"		: 100
 	}
 }
