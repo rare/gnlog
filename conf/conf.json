@@ -1,6 +1,10 @@
 {
 	"log_dir"				: "./log",
 	"data_dir"				: "./data",
+	"auth"					: {
+		enable					: true,
+		filename				: "./auth.conf"
+	},
 	"server"				: {
 		"listen_addr" 			: "0.0.0.0:20000",
 		"max_clients"			: 10000,

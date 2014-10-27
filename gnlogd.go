@@ -46,6 +46,13 @@ func init() {
 	initLog()
 }
 
+func initAuth() {
+	if err := gnlog.Auth.Init(); err != nil {
+		fmt.Printf("Auth.Init error: (%s).\n", err)
+		os.Exit(1)
+	}
+}
+
 func initHandler(svr *gnet.Server) {
 	svr.HandleFunc(gnlog.CMD_START, gnlog.HandleStart)
 	svr.HandleFunc(gnlog.CMD_LOG, gnlog.HandleLog)
@@ -63,6 +70,7 @@ func main() {
 		return
 	}
 
+	initAuth()
 	initHandler(svr)
 
 	wg.Add(1)
