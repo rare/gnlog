@@ -12,6 +12,7 @@ type AuthConfig struct {
 type GNLogConfig struct {
 	LogDir			string		`json:"log_dir"`
 	DataDir			string		`json:"data_dir"`
+	LogChanBufSize	uint32		`json:"log_chan_buf_size"`
 	Auth			AuthConfig	`json:"auth"`
 	Server			gnet.Config	`json:"server"`
 }

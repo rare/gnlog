@@ -38,13 +38,16 @@ func (this *Authorizer) Init() error {
 	return nil
 }
 
-func (this *Authorizer) Check(auth string) bool {
+func (this *Authorizer) Check(auth string) error {
 	if !Conf.Auth.Enable {
-		return true
+		return nil
 	}
 
-	flag, ok := this.auth_list[auth]
-	return ok && flag
+	if _, ok := this.auth_list[auth]; !ok {
+		return errors.New("auth failed")
+	}
+
+	return nil
 }
 
 var (

@@ -5,7 +5,11 @@ import (
 	"os"
 )
 
+var (
+)
+
 func InitLog() {
+
 	//init logger
 }
 

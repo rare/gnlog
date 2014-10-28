@@ -1,9 +1,10 @@
 {
 	"log_dir"				: "./log",
 	"data_dir"				: "./data",
+	"log_chan_buf_size"		: 100,
 	"auth"					: {
 		enable					: true,
-		filename				: "./auth.conf"
+		filename				: "./conf/auth.conf"
 	},
 	"server"				: {
 		"listen_addr" 			: "0.0.0.0:20000",
@@ -12,5 +13,7 @@
 		"read_timeout"			: 10,
 		"write_timeout"			: 10,
 		"out_chan_buf_size"		: 100
+		"black_list_file"		: "./conf/blacklist.conf"
+		"white_list_file"		: "./conf/whitelist.conf"
 	}
 }

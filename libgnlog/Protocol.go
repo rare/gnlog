@@ -19,7 +19,7 @@ const (
 type StartCmd struct {
 	Auth		string					`json:"auth"`
 	Catalog		string					`json:"catalog"`
-	FileName	string					`json:"filename"`
+	Filename	string					`json:"filename"`
 	Mode		uint8					`json:"mode"`
 }
 
