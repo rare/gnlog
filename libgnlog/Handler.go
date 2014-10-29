@@ -1,6 +1,8 @@
 package gnlog
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"path/filepath"
 	"strconv"
@@ -27,11 +29,43 @@ func HandleStart(req *gnet.Request, resp *gnet.Response) error {
 	}
 
 	cmd := new(StartCmd)
-	if cmd.Deserialize(buf) != nil {
+	if err := json.Unmarshal(buf, cmd); err != nil {
 		return err
 	}
 
+	var status int32 = STATUS_OK
 	if err := Auth.Check(cmd.Auth); err != nil {
+		status = STATUS_AUTH_ERR
+		resp.SetCloseAfterSending()
+	}
+
+	var srbuf []byte
+	sr := new(StartResp)
+	sr.Status = status
+	srbuf, err = json.Marshal(sr)
+	if err != nil {
+		return err
+	}
+	resp.SetBody(bytes.NewBuffer(srbuf))
+
+	req.Client().Storage().Set("mode", cmd.Mode)
+	req.Client().Storage().Set("authed", true)
+
+	return nil
+}
+
+func HandleLog(req *gnet.Request, resp *gnet.Response) error {
+	if _, ok := req.Client().Storage().Get("authed"); !ok {
+		return errors.New("channel not authed")
+	}
+
+	buf, err := req.Body()
+	if err != nil {
+		return err
+	}
+
+	cmd := new(LogCmd)
+	if err := json.Unmarshal(buf, cmd); err != nil {
 		return err
 	}
 
@@ -40,34 +74,11 @@ func HandleStart(req *gnet.Request, resp *gnet.Response) error {
 		return err
 	}
 
-	req.Client().Storage().Set("catalog", catalog)
-	req.Client().Storage().Set("filename", filename)
-	req.Client().Storage().Set("mode", cmd.Mode)
-
 	logwriter := NewFileLogWriter()
 	err = logwriter.Init(catalog, filename)
 	if err != nil {
 		return err
 	}
-	req.Client().Storage().Set("logwriter", logwriter)
-
-	req.Client().Storage().Set("started", true)
-
-	return nil
-}
-
-func HandleLog(req *gnet.Request, resp *gnet.Response) error {
-	if _, ok := req.Client().Storage().Get("started"); !ok {
-		return errors.New("channel not started")
-	}
-
-	buf, err := req.Body()
-	if err != nil {
-		return err
-	}
-
-	val, _ := req.Client().Storage().Get("logwriter")
-	logwriter, _  := val.(LogWriter)
 	logwriter.Write(buf)
 
 	return nil

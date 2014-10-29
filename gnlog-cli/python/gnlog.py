@@ -7,7 +7,7 @@ from threading import Thread
 
 LOG_BUF_SIZE = 100
 
-def LogSender(queue):
+def LogSender(queue, host, port, auth, catalog, filename):
     while True:
         msg = queue.get()
         #send msg
@@ -16,10 +16,15 @@ def LogSender(queue):
         
 
 class GNLogHandler(Handler):
-    def __init__(self, strm):
+    def __init__(self, host, port, auth, catalog, filename):
         Handler.__init__(self)
-        self.queue = Queue(LOG_BUF_SIZE)
-        t = Thread(target=LogSender, args=(self.queue,))
+		self.queue = Queue(LOG_BUF_SIZE)
+		self.host = host
+		self.port = port
+		self.auth = auth
+		self.catalog = catalog
+		self.filename = filename
+        t = Thread(target=LogSender, args=(self.queue, self.host, self.port, self.auth, self.catalog, self.filename))
         t.daemon = True
         t.start()
 

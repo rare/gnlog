@@ -13,6 +13,7 @@ type GNLogConfig struct {
 	LogDir			string		`json:"log_dir"`
 	DataDir			string		`json:"data_dir"`
 	LogChanBufSize	uint32		`json:"log_chan_buf_size"`
+	MaxLogFileSize	int64		`json:"max_log_file_size"`
 	Auth			AuthConfig	`json:"auth"`
 	Server			gnet.Config	`json:"server"`
 }
