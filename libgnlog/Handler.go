@@ -1,6 +1,8 @@
 package gnlog
 
 import (
+	"fmt"			//debug
+
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -23,18 +25,27 @@ func validateDirAndFilename(catalog string, filename string) (string, string, er
 }
 
 func HandleStart(req *gnet.Request, resp *gnet.Response) error {
+	//debug
+	fmt.Println("handle start cmd")
+
 	buf, err := req.Body()
 	if err != nil {
+		//debug
+		fmt.Println("read start cmd body error")
 		return err
 	}
 
 	cmd := new(StartCmd)
 	if err := json.Unmarshal(buf, cmd); err != nil {
+		//debug
+		fmt.Println("parse start cmd body error")
 		return err
 	}
 
 	var status int32 = STATUS_OK
 	if err := Auth.Check(cmd.Auth); err != nil {
+		//debug
+		fmt.Println("check auth error")
 		status = STATUS_AUTH_ERR
 		resp.SetCloseAfterSending()
 	}
@@ -44,8 +55,11 @@ func HandleStart(req *gnet.Request, resp *gnet.Response) error {
 	sr.Status = status
 	srbuf, err = json.Marshal(sr)
 	if err != nil {
+		//debug
+		fmt.Println("encode resp error")
 		return err
 	}
+	resp.SetBodyLen((uint32)(len(srbuf)))
 	resp.SetBody(bytes.NewBuffer(srbuf))
 
 	req.Client().Storage().Set("mode", cmd.Mode)
@@ -79,7 +93,18 @@ func HandleLog(req *gnet.Request, resp *gnet.Response) error {
 	if err != nil {
 		return err
 	}
-	logwriter.Write(buf)
+	var mode uint8 = MODE_LINE
+	if m, ok := req.Client().Storage().Get("mode"); ok {
+		mode = m.(uint8)
+	}
+	logdata := bytes.NewBufferString(cmd.LogData)
+	logdata.Grow(1)
+	if mode == MODE_LINE {
+		logdata.WriteByte('\n')
+	} else {
+		logdata.WriteByte(0)
+	}
+	logwriter.Write(logdata.Bytes())
 
 	return nil
 }

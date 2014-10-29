@@ -1,6 +1,8 @@
 package gnlog
 
 import (
+	"fmt"		//debug
+
 	"os"
 	"path/filepath"
 	"sync"
@@ -20,6 +22,8 @@ type FileLogWriterRoutine struct {
 }
 
 func NewFileLogWriterRoutine() *FileLogWriterRoutine {
+	//debug
+	fmt.Println("start a file log writer routine")
 	return &FileLogWriterRoutine {
 		inchan:		make(chan []byte, Conf.LogChanBufSize),
 	}
@@ -42,7 +46,7 @@ func (this *FileLogWriterRoutine) Init(path string) error {
 			fi, _ := os.Stat(path)
 			if fi.Size() > Conf.MaxLogFileSize {
 				f.Close()
-				os.Rename(path, path + time.Now().Format("01-02-2006_03:04:55"))
+				os.Rename(path, path + "." + time.Now().Format("01-02-2006_03:04:55"))
 				f, err = os.Create(path)
 				if err != nil {
 					//TODO
@@ -124,6 +128,7 @@ func startFileLogWriter(catalog string, filename string) (*FileLogWriterRoutine,
 	if err := flwr.Init(filepath.Join(Conf.DataDir, catalog, filename)); err != nil {
 		return nil, err
 	}
+	fileLogWriters[filepath.Join(catalog, filename)] = flwr
 
 	return flwr, nil
 }

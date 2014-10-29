@@ -2,7 +2,7 @@
 	"log_dir"				: "./log",
 	"data_dir"				: "./data",
 	"log_chan_buf_size"		: 100,
-	"max_log_file_size"		: 2048000000,
+	"max_log_file_size"		: 8000000,
 	"auth"					: {
 		"enable"				: true,
 		"filename"				: "./conf/auth.conf"
@@ -10,7 +10,8 @@
 	"server"				: {
 		"listen_addr" 			: "0.0.0.0:20000",
 		"max_clients"			: 10000,
-		"heartbeat_timeout"		: 5,
+		"max_body_len"			: 4096,
+		"heartbeat_timeout"		: 15,
 		"read_timeout"			: 10,
 		"write_timeout"			: 10,
 		"out_chan_buf_size"		: 100,
