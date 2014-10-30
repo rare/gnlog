@@ -1,6 +1,7 @@
 package gnlog
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
