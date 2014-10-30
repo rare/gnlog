@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"strings"
+	log "github.com/cihub/seelog"
 )
 
 type Authorizer struct {
@@ -20,7 +21,7 @@ func NewAutorizer() *Authorizer {
 func (this *Authorizer) Init() error {
 	file, err := os.Open(Conf.Auth.Filename)
 	if err != nil {
-		//TODO
+		log.Warnf("open auth file(%s) error: (%v)", Conf.Auth.Filename, err)
 		return errors.New("open auth file error")
 	}
 	defer file.Close()
@@ -33,6 +34,7 @@ func (this *Authorizer) Init() error {
 		}
 	}
 	if err := scanner.Err(); err != nil {
+		log.Warnf("read auth file(%s) error: (%v)", Conf.Auth.Filename, err)
 		return errors.New("read auth file error")
 	}
 	return nil

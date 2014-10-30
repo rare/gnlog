@@ -11,6 +11,7 @@ import (
 	"github.com/rare/gnet"
 	"github.com/rare/gnlog/libgnlog"
 	"github.com/rare/gnlog/conf"
+	log "github.com/cihub/seelog"
 )
 
 //globals definition
@@ -30,13 +31,18 @@ func initSignal(wg *sync.WaitGroup) {
 func loadConfig() {
 	err := conf.LoadConfig(*CONF_PATH, &gnlog.Conf)
 	if err != nil {
-		fmt.Printf("LoadConfig (%s) failed: (%s).\n", *CONF_PATH, err)
+		fmt.Printf("LoadConfig (%s) failed: (%v)", *CONF_PATH, err)
 		os.Exit(1)
 	}
 }
 
 func initLog() {
-	gnlog.InitLog()
+	logger, err := log.LoggerFromConfigAsFile("./conf/log.xml")
+	if err != nil {
+		fmt.Printf("Load log config failed: (%v)", err)
+		os.Exit(1)
+	}
+	log.ReplaceLogger(logger)
 }
 
 //init function
@@ -48,8 +54,7 @@ func init() {
 
 func initAuth() {
 	if err := gnlog.Auth.Init(); err != nil {
-		fmt.Printf("Auth.Init error: (%s).\n", err)
-		os.Exit(1)
+		log.Criticalf("Auth.Init error: (%v)", err)
 	}
 }
 
@@ -66,7 +71,7 @@ func main() {
 	svr := gnet.NewServer()
 	err := svr.Init(&gnlog.Conf.Server)
 	if err != nil {
-		fmt.Printf("Init Server error: (%s).\n", err)
+		log.Criticalf("Init Server error: (%v)", err)
 		return
 	}
 

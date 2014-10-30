@@ -1,13 +1,12 @@
 package gnlog
 
 import (
-	"fmt"		//debug
-
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 	"github.com/rare/gnet/gnutil"
+	log "github.com/cihub/seelog"
 )
 
 var (
@@ -38,7 +37,7 @@ func runSplitFileMonitor() {
 			if Conf.Log.SplitPolicy.BySize.Enable {
 				fi, err := os.Stat(flw.path)
 				if err != nil {
-					//TODO
+					log.Warnf("split by size, stat file(%s) error: (%v)", flw.path, err)
 					continue
 				}
 
@@ -68,15 +67,11 @@ func NewFileLogWriterRoutine() *FileLogWriterRoutine {
 }
 
 func (this *FileLogWriterRoutine) Run() {
-	//TODO
-	//trace
-	fmt.Println("start file log writer routine")
+	log.Tracef("start file log writer routine for file(%s)", this.path)
 
 	f, err := os.OpenFile(this.path, os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {
-		//TODO
-		//debug
-		fmt.Println("open file(" + this.path + "for writing error")
+		log.Warnf("open file(%s) for writing error: (%v)", this.path, err)
 		return
 	}
 
@@ -85,7 +80,7 @@ func (this *FileLogWriterRoutine) Run() {
 			case buf := <-this.inchan:
 				_, err := f.Write(buf)
 				if err != nil {
-					//TODO
+					log.Warnf("write data to file(%s) error: (%v)", this.path, err)
 					break
 				}
 			case t := <-this.spchan:
@@ -94,7 +89,7 @@ func (this *FileLogWriterRoutine) Run() {
 				os.Rename(this.path, newpath)
 				f, err = os.Create(this.path)
 				if err != nil {
-					//TODO
+					log.Warnf("create file(%s) after split error: (%v)", this.path, err)
 					break
 				}
 		}
@@ -185,11 +180,11 @@ func (this *FileLogWriter) Init(catalog string, filename string) error {
 	this.filename = filename
 
 	if err := makeSureDirExists(filepath.Join(Conf.Log.Dir, this.catalog)); err != nil {
-		//TODO
+		log.Warnf("init file log writer, create dir(%s) error: (%v)", this.catalog, err)
 		return err
 	}
 	if err := makeSureFileExists(filepath.Join(Conf.Log.Dir, this.catalog, this.filename)); err != nil {
-		//TODO
+		log.Warnf("init file log writer, create file(%s) error: (%v)", this.filename, err)
 		return err
 	}
 
@@ -201,7 +196,7 @@ func (this *FileLogWriter) Init(catalog string, filename string) error {
 		var err error
 		this.routine, err = startFileLogWriter(this.catalog, this.filename)
 		if err != nil {
-			//TODO
+			log.Warnf("start file log writer error: (%v)", err)
 			return err
 		}
 	} else {

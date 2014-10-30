@@ -1,8 +1,6 @@
 package gnlog
 
 import (
-	"fmt"			//debug
-
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -10,13 +8,16 @@ import (
 	"strconv"
 	"strings"
 	"github.com/rare/gnet"
+	log "github.com/cihub/seelog"
 )
 
 func validateDirAndFilename(catalog string, filename string) (string, string, error) {
 	if len(catalog) > MAX_DIR_NAME_LEN {
+		log.Warnf("dir name(%s) too long", catalog)
 		return "", "", errors.New("dir name too long")
 	}
 	if len(filename) > MAX_FILE_NAME_LEN {
+		log.Warnf("file name(%s) too long", filename)
 		return "", "", errors.New("file name too long")
 	}
 	catalog = strings.Replace(catalog, strconv.QuoteRune(filepath.Separator), "_", -1)
@@ -25,27 +26,23 @@ func validateDirAndFilename(catalog string, filename string) (string, string, er
 }
 
 func HandleStart(req *gnet.Request, resp *gnet.Response) error {
-	//debug
-	fmt.Println("handle start cmd")
+	log.Tracef("start handle StartCmd")
 
 	buf, err := req.Body()
 	if err != nil {
-		//debug
-		fmt.Println("read start cmd body error")
+		log.Warnf("read start cmd body error")
 		return err
 	}
 
 	cmd := new(StartCmd)
 	if err := json.Unmarshal(buf, cmd); err != nil {
-		//debug
-		fmt.Println("parse start cmd body error")
+		log.Warnf("parse start cmd body error: (%v)", err)
 		return err
 	}
 
 	var status int32 = STATUS_OK
 	if err := Auth.Check(cmd.Auth); err != nil {
-		//debug
-		fmt.Println("check auth error")
+		log.Warnf("check auth error, auth string(%s)", cmd.Auth)
 		status = STATUS_AUTH_ERR
 		resp.SetCloseAfterSending()
 	}
@@ -55,8 +52,7 @@ func HandleStart(req *gnet.Request, resp *gnet.Response) error {
 	sr.Status = status
 	srbuf, err = json.Marshal(sr)
 	if err != nil {
-		//debug
-		fmt.Println("encode resp error")
+		log.Warnf("encoding StartResp error: (%v)", err)
 		return err
 	}
 	resp.SetBodyLen((uint32)(len(srbuf)))
@@ -70,27 +66,32 @@ func HandleStart(req *gnet.Request, resp *gnet.Response) error {
 
 func HandleLog(req *gnet.Request, resp *gnet.Response) error {
 	if _, ok := req.Client().Storage().Get("authed"); !ok {
+		log.Warnf("recv LogCmd before channel authed")
 		return errors.New("channel not authed")
 	}
 
 	buf, err := req.Body()
 	if err != nil {
+		log.Warnf("read LogCmd body error")
 		return err
 	}
 
 	cmd := new(LogCmd)
 	if err := json.Unmarshal(buf, cmd); err != nil {
+		log.Warnf("parse LogCmd error: (%v)", err)
 		return err
 	}
 
 	catalog, filename, err := validateDirAndFilename(cmd.Catalog, cmd.Filename)
 	if err != nil {
+		log.Warnf("validate dir(%s) and file(%s) name error", cmd.Catalog, cmd.Filename)
 		return err
 	}
 
 	logwriter := NewFileLogWriter()
 	err = logwriter.Init(catalog, filename)
 	if err != nil {
+		log.Warnf("init log writer error: (%v)", err)
 		return err
 	}
 	var mode uint8 = MODE_LINE
