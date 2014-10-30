@@ -148,6 +148,9 @@ func (this *GNLogClient) Init(addr, auth, catalog, filename string) error {
 
 	go this.sendHeartbeat()
 
+	//debug
+	fmt.Println("start success")
+
 	return nil
 }
 

@@ -1,11 +1,21 @@
 {
-	"log_dir"				: "./log",
-	"data_dir"				: "./data",
-	"log_chan_buf_size"		: 100,
-	"max_log_file_size"		: 8000000,
 	"auth"					: {
 		"enable"				: true,
 		"filename"				: "./conf/auth.conf"
+	},
+	"log"					: {
+		"dir"				: "./data",
+		"buf_size"			: 100,
+		"split_policy"		: {
+			"by_time"		: {
+				"enable"	: true,
+				"rule"		: "byhour"
+				},
+			"by_size"		: {
+				"enbale"	: true,
+				"max_log_file_size" : 8000000
+			}
+		}
 	},
 	"server"				: {
 		"listen_addr" 			: "0.0.0.0:20000",

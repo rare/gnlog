@@ -9,12 +9,30 @@ type AuthConfig struct {
 	Filename		string		`json:"filename"`
 }
 
-type GNLogConfig struct {
-	LogDir			string		`json:"log_dir"`
-	DataDir			string		`json:"data_dir"`
-	LogChanBufSize	uint32		`json:"log_chan_buf_size"`
+type ByTimePolicy struct {
+	Enable			bool		`json:"enable"`
+	Rule			string		`json:"rule"`
+}
+
+type BySizePolicy struct {
+	Enable			bool		`json:"enable"`
 	MaxLogFileSize	int64		`json:"max_log_file_size"`
+}
+
+type SplitPolicy struct {
+	ByTime			ByTimePolicy	`json:"by_time"`
+	BySize			BySizePolicy	`json:"by_size"`
+}
+
+type LogConfig struct {
+	Dir				string		`json:"dir"`
+	BufSize			uint32		`json:"buf_size"`
+	SplitPolicy		SplitPolicy	`json:"split_policy"`
+}
+
+type GNLogConfig struct {
 	Auth			AuthConfig	`json:"auth"`
+	Log				LogConfig	`json:"log"`
 	Server			gnet.Config	`json:"server"`
 }
 
