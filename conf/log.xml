@@ -1,4 +1,4 @@
-<seelog minlevel="trace">
+<seelog minlevel="info">
 	<outputs formatid="common">
 		<console />
 		<rollingfile type="size" filename="/home/duxi/log/gnlog/gnlod.log" maxsize="102400000" maxrolls="5"/>
