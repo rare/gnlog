@@ -71,6 +71,8 @@ func NewFileLogWriterRoutine() *FileLogWriterRoutine {
 func (this *FileLogWriterRoutine) Run() {
 	log.Tracef("start file log writer routine for file(%s)", this.path)
 
+	ticker := time.NewTicker(3 * time.Second)
+
 	f, err := os.OpenFile(this.path, os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {
 		log.Warnf("open file(%s) for writing error: (%v)", this.path, err)
@@ -80,6 +82,9 @@ func (this *FileLogWriterRoutine) Run() {
 
 	for {
 		select {
+			case <-ticker.C:
+				wr.Flush()
+
 			case buf := <-this.inchan:
 				_, err := wr.Write(buf)
 				if err != nil {

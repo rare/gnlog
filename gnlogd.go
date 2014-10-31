@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/rare/gnet"
 	"github.com/rare/gnlog/libgnlog"
@@ -81,6 +82,7 @@ func main() {
 	wg.Add(1)
 	go func(){
 		svr.Run()
+		time.Sleep(5 * time.Second)	//wait logdata to be flushed
 		wg.Done()
 	}()
 	wg.Wait()
