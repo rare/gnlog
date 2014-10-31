@@ -30,7 +30,9 @@ func main() {
 		log.Info("info message")
 		log.Warn("warn message")
 		log.Error("error message")
-		time.Sleep(time.Second)
+		//time.Sleep(time.Second)
+		break
 	}
+	time.Sleep(time.Second)
 }
 

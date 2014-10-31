@@ -72,41 +72,49 @@ func (this *FileLogWriterRoutine) Run() {
 	log.Tracef("start file log writer routine for file(%s)", this.path)
 
 	ticker := time.NewTicker(3 * time.Second)
+	now := time.Now()
+	lastwritetime := now
 
 	f, err := os.OpenFile(this.path, os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {
-		log.Warnf("open file(%s) for writing error: (%v)", this.path, err)
+		log.Warnf("open file(%s) for writing error: (%v), exit file log writer routine", this.path, err)
 		return
 	}
 	wr := bufio.NewWriterSize(f, int(Conf.Log.BufSize * 4096))
 
 	for {
 		select {
-			case <-ticker.C:
-				wr.Flush()
+			case now = <-ticker.C:
+				if now.After(lastwritetime.Add(60 * time.Second)) {
+					log.Tracef("long time idle, break file(%s) log writer routine", this.path)
+					f.Close()
+					return
+				} else {
+					wr.Flush()
+				}
 
 			case buf := <-this.inchan:
+				lastwritetime = now
 				_, err := wr.Write(buf)
 				if err != nil {
-					log.Warnf("write data to file(%s) error: (%v)", this.path, err)
-					break
+					log.Warnf("write data to file(%s) error: (%v), exit log writer routine", this.path, err)
+					wr.Flush()
+					f.Close()
+					return
 				}
 			case t := <-this.spchan:
 				wr.Flush()
 				f.Close()
-				newpath := fmt.Sprintf("%s.%d%d%d%d%d%d", this.path, t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+				newpath := fmt.Sprintf("%s.%04d%02d%02d%02d%02d%02d", this.path, t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 				os.Rename(this.path, newpath)
 				f, err = os.Create(this.path)
 				if err != nil {
-					log.Warnf("create file(%s) after split error: (%v)", this.path, err)
+					log.Warnf("create file(%s) after split error: (%v), exit file log writer routine", this.path, err)
 					return
 				}
 				wr = bufio.NewWriterSize(f, int(Conf.Log.BufSize * 4096))
 		}
 	}
-
-	wr.Flush()
-	f.Close()
 }
 
 func (this *FileLogWriterRoutine) Init(path string) {
