@@ -87,6 +87,10 @@ func HandleLog(req *gnet.Request, resp *gnet.Response) error {
 		log.Warnf("validate dir(%s) and file(%s) name error", cmd.Catalog, cmd.Filename)
 		return err
 	}
+	if len(cmd.LogData) == 0 {
+		log.Warn("empty logdata, skip")
+		return nil
+	}
 
 	logwriter := NewFileLogWriter()
 	err = logwriter.Init(catalog, filename)
@@ -101,7 +105,9 @@ func HandleLog(req *gnet.Request, resp *gnet.Response) error {
 	logdata := bytes.NewBufferString(cmd.LogData)
 	logdata.Grow(1)
 	if mode == MODE_LINE {
-		logdata.WriteByte('\n')
+		if cmd.LogData[len(cmd.LogData) - 1] != '\n' {
+			logdata.WriteByte('\n')
+		}
 	} else {
 		logdata.WriteByte(0)
 	}
