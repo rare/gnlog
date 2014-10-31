@@ -2,25 +2,37 @@ package gnlogcli
 
 import (
 	"fmt"
-	"testing"
 	"os"
+	"testing"
+	"time"
+	log "github.com/cihub/seelog"
 )
 
 var cli *GNLogClient = NewGNLogClient()
 
 func init() {
-	if err := cli.Init("localhost:20000", "abcdefg", "www.123.com", "user.log"); err != nil {
-		fmt.Println(err.Error())
+	var conf Config = Config {
+		Addr:		"localhost:20000",
+		Auth:		"abcdefg",
+		Catalog:	"www.123.com",
+		Filename:	"user.log",
+		Minlevel:	log.InfoLvl,
+		Format:		"%Date/%Time [%LEV] %Msg%n",
+	}
+	if err := Init(&conf); err != nil {
+		fmt.Printf("init log error: (%v)\n", err)
 		os.Exit(1)
 	}
 }
 
 func TestLog(t *testing.T) {
 	for {
-		err := cli.Log("test")
-		if err != nil {
-			fmt.Println(err.Error())
-		}
+		log.Trace("trace message")
+		log.Debug("debug message")
+		log.Info("info message")
+		log.Warn("warn message")
+		log.Error("error message")
+		time.Sleep(time.Second)
 	}
 }
 
