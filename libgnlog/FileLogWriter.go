@@ -1,6 +1,7 @@
 package gnlog
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -75,27 +76,31 @@ func (this *FileLogWriterRoutine) Run() {
 		log.Warnf("open file(%s) for writing error: (%v)", this.path, err)
 		return
 	}
+	wr := bufio.NewWriterSize(f, int(Conf.Log.BufSize * 4096))
 
 	for {
 		select {
 			case buf := <-this.inchan:
-				_, err := f.Write(buf)
+				_, err := wr.Write(buf)
 				if err != nil {
 					log.Warnf("write data to file(%s) error: (%v)", this.path, err)
 					break
 				}
 			case t := <-this.spchan:
+				wr.Flush()
 				f.Close()
 				newpath := fmt.Sprintf("%s.%d%d%d%d%d%d", this.path, t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 				os.Rename(this.path, newpath)
 				f, err = os.Create(this.path)
 				if err != nil {
 					log.Warnf("create file(%s) after split error: (%v)", this.path, err)
-					break
+					return
 				}
+				wr = bufio.NewWriterSize(f, int(Conf.Log.BufSize * 4096))
 		}
 	}
 
+	wr.Flush()
 	f.Close()
 }
 

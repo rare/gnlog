@@ -19,12 +19,12 @@ var (
 	CONF_PATH = flag.String("c", "./conf/conf.json", "conf file path")
 )
 
-func initSignal(wg *sync.WaitGroup) {
+func initSignal(svr *gnet.Server) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		<-c
-		wg.Done()
+		svr.Stop()
 	}()
 }
 
@@ -65,10 +65,10 @@ func initHandler(svr *gnet.Server) {
 
 func main() {
 	wg := &sync.WaitGroup{}
-
-	initSignal(wg)
-
 	svr := gnet.NewServer()
+
+	initSignal(svr)
+
 	err := svr.Init(&gnlog.Conf.Server)
 	if err != nil {
 		log.Criticalf("Init Server error: (%v)", err)
